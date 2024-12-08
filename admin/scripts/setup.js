@@ -59,8 +59,13 @@ if (process.env.npm_config_plugins === 'true') {
 
       shell.echo('🏗  Building...');
 
-      const build = shell.exec(`cd "${path.resolve(plugins, plugin)}" && APP_PATH="${appPath}" npm run build`, {
-        silent
+      const { execFile } = require('child_process');
+
+      execFile('npm', ['run', 'build'], { cwd: path.resolve(plugins, plugin), env: { ...process.env, APP_PATH: appPath }, stdio: 'inherit' }, (error, stdout, stderr) => {
+        if (error) {
+          console.error(stderr);
+          process.exit(1);
+        }
       });
 
       if (build.stderr && build.code !== 0) {
